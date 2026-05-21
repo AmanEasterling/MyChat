@@ -9,7 +9,7 @@ public class Client {
     public static void main(String[] args) {
         try {
             // Connect to server running on SAME 127.0.0.1 computer
-            Socket ourSocket = new Socket("127.0.0.1", 12345);
+            Socket ourSocket = new Socket("10.69.61.179.", 54321);
 
             // Client MUST create InputStream BEFORE OutputStream!!!!!!
             ObjectOutputStream myObjOutput = new ObjectOutputStream(ourSocket.getOutputStream());
