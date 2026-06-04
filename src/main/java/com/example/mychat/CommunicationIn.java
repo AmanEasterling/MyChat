@@ -1,12 +1,18 @@
 package com.example.mychat;
 
+import javafx.application.Platform;
+
+import java.io.IOException;
+
 public class CommunicationIn implements Runnable {
     CommunicationConnection myConnection;
+    HelloController myController;
     boolean isServer;
 
-    public CommunicationIn(CommunicationConnection connection, boolean isServer) {
+    public CommunicationIn(CommunicationConnection connection, boolean isServer, HelloController controller) {
         this.myConnection = connection;
         this.isServer = isServer;
+        this.myController = controller;
     }
 
     @Override
@@ -21,27 +27,55 @@ public class CommunicationIn implements Runnable {
             }
 
             if (newMessage != null) {
-                if (!isServer) {
-                    System.out.println("CommunicationIn: " + newMessage);
-                    continue;
-                }
                 System.out.println("CommunicationIn from: " + myConnection.getName() + ": " + newMessage);
-                if (newMessage.mode == 1) {
-                    // START
-                    // associate FROM name with its socket
-                    myConnection.setName(newMessage.from);
-                    newMessage = new Message(1,2,"Welcome: " + newMessage.from, "SERVER", newMessage.from);
-                } else if (newMessage.mode == 2) {
-                    // COMMUNICATE
-                    newMessage = newMessage;
-                } else if (newMessage.mode == 3) {
-                    // STOP
-                    newMessage = new Message(1,3,"Goodbye: " + newMessage.from, "SERVER", newMessage.from);
-                    stayConnected = false;
-                }
-                boolean putSuccess  = Server.theQueue.put(newMessage);
-                while (!putSuccess) {
-                    putSuccess  = Server.theQueue.put(newMessage);
+                if (isServer) {
+                    if (newMessage.mode == 1) {
+                        // START
+                        // associate FROM name with its socket
+                        myConnection.setName(newMessage.from);
+                        newMessage = new Message(1,1,"Welcome: " + newMessage.from, newMessage.from, "ALL");
+                    } else if (newMessage.mode == 2) {
+                        // COMMUNICATE
+                        newMessage = newMessage;
+                    } else if (newMessage.mode == 3) {
+                        // STOP
+                        newMessage = new Message(1,3,"Goodbye: " + newMessage.from, newMessage.from,"ALL");
+                        stayConnected = false;
+                    }
+                    boolean putSuccess  = Server.theQueue.put(newMessage);
+                    while (!putSuccess) {
+                        putSuccess  = Server.theQueue.put(newMessage);
+                    }
+                } else {
+                    if (newMessage.mode == 1) {
+                        // START
+                        // add FROM name to chatters list
+                        Message NewMessage = newMessage;
+                        Platform.runLater(() -> {
+
+                            myController.addAnotherChatter(NewMessage.from);
+
+                        });
+
+                    } else if (newMessage.mode == 2) {
+                        // tell the Controller to add the message to the ListView
+                        Message finalNewMessage = newMessage;
+                        Platform.runLater(() -> {
+                            try {
+                                myController.receiveMessage(finalNewMessage);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                        });
+
+                    } else if (newMessage.mode == 3) {
+                        // STOP
+                        // remove FROM name to chatters list
+
+                        //newMessage = new Message(1,3,"Goodbye: " + newMessage.from, "SERVER", newMessage.from);
+                        //stayConnected = false;
+                    }
                 }
             }
         }

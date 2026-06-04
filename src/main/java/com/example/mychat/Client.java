@@ -15,7 +15,7 @@ public class Client {
             ObjectOutputStream myObjOutput = new ObjectOutputStream(ourSocket.getOutputStream());
             ObjectInputStream myObjInput = new ObjectInputStream(ourSocket.getInputStream());
             CommunicationConnection newConnection = new CommunicationConnection("Mr. H",ourSocket,myObjInput,myObjOutput);
-            CommunicationIn myCommunicationIn = new CommunicationIn(newConnection, false);
+            CommunicationIn myCommunicationIn = new CommunicationIn(newConnection, false, null);
             Thread communicationInThread = new Thread(myCommunicationIn);
             communicationInThread.start();
 

@@ -21,7 +21,7 @@ public class ServerConnector implements Runnable {
                 CommunicationConnection newConnection = new CommunicationConnection(null,newSocket,myObjInput,myObjOutput);
                 Server.allConnections.add(newConnection);
 
-                CommunicationIn newClient = new CommunicationIn(newConnection, true);
+                CommunicationIn newClient = new CommunicationIn(newConnection, true, null);
                 Thread perClientThread = new Thread(newClient);
                 perClientThread.start();
             }
