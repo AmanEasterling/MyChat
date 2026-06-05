@@ -11,7 +11,7 @@ import java.net.Socket;
 public class HelloController {
     public TextArea typeMessage;
     public TextField changNameText;
-    public ChoiceBox directMessage;
+    public ChoiceBox<String> directMessage;
     public Button sendButton;
     public ListView<String> chatBox;
 
@@ -50,10 +50,13 @@ public class HelloController {
 
     public void sendMessage() throws IOException {
         String theText = typeMessage.getText(); // FINISH
-        Message message1 = new Message(1,2,theText,newName, "ALL");
+        // Get the to name from the choice box:
+       // = directMessage.getValue();
+        Message message1 = new Message(1,2,theText,newName, directMessage.getValue());
         System.out.println("sendMessage: " + message1);
         myObjOutput.writeObject(message1);
         myObjOutput.flush();
+
     }
 
     public void receiveMessage(Message message) throws IOException {
